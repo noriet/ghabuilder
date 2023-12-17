@@ -1,0 +1,36 @@
+services:
+  # このサービス名は変更不能
+  docker:
+    image: docker:dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    networks:
+      - some-network
+    volumes:
+      - some-certs-ca:/certs/ca
+      - some-docker-certs-client:/certs/client
+
+  builder:
+    build: ./builder
+    depends_on:
+      - docker
+    tty: true
+    stdin_open: true
+    working_dir: /var/lib/work
+    command: bash
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    networks:
+      - some-network
+    volumes:
+      - some-docker-certs-client:/certs/client:ro
+      - work:/var/lib/work
+
+networks:
+  some-network:
+
+volumes:
+  some-certs-ca:
+  some-docker-certs-client:
+  work:
